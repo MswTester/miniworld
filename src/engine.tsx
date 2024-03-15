@@ -103,10 +103,8 @@ function GameEngine() {
         // 가속도 센서에 따른 카메라 회전
         const updateCamera = () => {
             const camera = engine.scenes[0].activeCamera as BABYLON.ArcRotateCamera;
-            // camera.alpha += dAlpha / 50;
-            // camera.beta -= dGamma / 50;
-            camera.alpha = -gamma / 180 * Math.PI;
-            camera.beta = beta / 180 * Math.PI;
+            camera.alpha += dAlpha / 50;
+            camera.beta -= dGamma / 50;
         }
 
         const updatePlayer = () => {

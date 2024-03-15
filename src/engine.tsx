@@ -3,6 +3,19 @@ import * as BABYLON from 'babylonjs';
 import * as CANNON from 'cannon';
 import 'babylonjs-loaders';
 
+function calculateCircularDifference(value1:number, value2:number, range:number) {
+    let diff = value2 - value1;
+    // 값이 긍정적인 방향으로 순환하는 경우
+    if (diff > range / 2) {
+        diff -= range;
+    }
+    // 값이 부정적인 방향으로 순환하는 경우
+    else if (diff < -range / 2) {
+        diff += range;
+    }
+    return diff;
+}
+
 function GameEngine() {
     const [once, setOnce] = useState(false)
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -72,9 +85,9 @@ function GameEngine() {
             setBeta(beta);
             setGamma(gamma);
             setAlpha(alpha);
-            dGamma = gamma - lastGamma;
-            dBeta = beta - lastBeta;
-            dAlpha = alpha - lastAlpha;
+            dGamma = calculateCircularDifference(lastGamma, gamma, 180);
+            dBeta = calculateCircularDifference(lastBeta, beta, 180);
+            dAlpha = calculateCircularDifference(lastAlpha, alpha, 360);
             lastGamma = gamma;
             lastBeta = beta;
             lastAlpha = alpha;
@@ -83,8 +96,8 @@ function GameEngine() {
         // 가속도 센서에 따른 카메라 회전
         const updateCamera = () => {
             const camera = engine.scenes[0].activeCamera as BABYLON.ArcRotateCamera;
-            camera.alpha += dGamma / 100;
-            camera.beta += dBeta / 100;
+            camera.alpha += dAlpha / 100;
+            camera.beta += dGamma / 100;
         }
 
         // 캔버스 크기 조정 함수

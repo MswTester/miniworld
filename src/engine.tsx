@@ -97,15 +97,16 @@ function GameEngine() {
             lastGamma = gamma;
             lastBeta = beta;
             lastAlpha = alpha;
-            setGammaDiff(dGamma);
         }
         window.addEventListener('deviceorientation', deviceOrientationHandler);
 
         // 가속도 센서에 따른 카메라 회전
         const updateCamera = () => {
             const camera = engine.scenes[0].activeCamera as BABYLON.ArcRotateCamera;
-            camera.alpha += dAlpha / 50;
-            camera.beta -= dGamma / 50;
+            // camera.alpha += dAlpha / 50;
+            // camera.beta -= dGamma / 50;
+            camera.alpha = -gamma / 180 * Math.PI;
+            camera.beta = beta / 180 * Math.PI;
         }
 
         const updatePlayer = () => {
@@ -157,7 +158,6 @@ function GameEngine() {
     return (<>
         {/* layout */}
         <div className="fixed top-0 left-0 w-full h-full bg-transparent flex flex-row justify-start items-start text-white">
-            <div>Gamma : {gammaDiff}</div>
             <div className="absolute bottom-3 right-3 bg-[#ffffff22] w-12 h-12 rounded-full"
             onClick={e => navigator.vibrate(1000)}
             ></div>

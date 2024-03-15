@@ -6,6 +6,8 @@ import 'babylonjs-loaders';
 function GameEngine() {
     const [once, setOnce] = useState(false)
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [beta, setBeta] = useState<number>(0);
+    const [gamma, setGamma] = useState<number>(0);
 
     useEffect(() => setOnce(true), [])
     useEffect(() => {
@@ -56,6 +58,8 @@ function GameEngine() {
                 if (!beta || !gamma) return;
                 player.position.x += gamma / 100;
                 player.position.z += beta / 100;
+                setBeta(beta);
+                setGamma(gamma);
             });
             
             return scene;
@@ -78,9 +82,21 @@ function GameEngine() {
         }
     }, [once]);
 
-    return (
+    return (<>
+        {/* layout */}
+        <div className="fixed top-0 left-0 w-full h-full bg-black z-10">
+            {/* display accelermeter */}
+            <div className="fixed top-0 left-0 w-full h-20 bg-black z-10">
+                <div className="flex flex-row items-center justify-center w-full h-full">
+                    <div className="flex-1 w-full h-full flex flex-row items-center justify-center">
+                        <div className="text-white text-2xl">beta: {beta}</div>
+                        <div className="text-white text-2xl">gamma: {gamma}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
-    );
+    </>);
 }
 
 export default GameEngine;

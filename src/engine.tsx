@@ -29,6 +29,7 @@ function GameEngine() {
             // 카메라 생성
             const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 4, 10, BABYLON.Vector3.Zero(), scene);
             camera.attachControl(canvas, false);
+            camera.radius = 10;
             
             // 라이트 생성
             const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene);
@@ -44,8 +45,8 @@ function GameEngine() {
 
             // 캐릭터 생성
             const player = BABYLON.MeshBuilder.CreateCylinder("player", { height: 2, diameterTop: 1, diameterBottom: 1 }, scene);
-            player.position.y = 0.5;
-            player.physicsImpostor = new BABYLON.PhysicsImpostor(player, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 1, restitution: 0.9 }, scene);
+            player.position.y = 2;
+            player.physicsImpostor = new BABYLON.PhysicsImpostor(player, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 1, restitution: 0 }, scene);
 
             scene.registerBeforeRender(() => {
                 // 카메라 위치 설정

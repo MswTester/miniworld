@@ -24,6 +24,7 @@ function GameEngine() {
     const [beta, setBeta] = useState<number>(0);
     const [gamma, setGamma] = useState<number>(0);
     const [alpha, setAlpha] = useState<number>(0);
+    const [gammaDiff, setGammaDiff] = useState<number>(0);
 
     useEffect(() => setOnce(true), [])
     useEffect(() => {
@@ -96,6 +97,7 @@ function GameEngine() {
             lastGamma = gamma;
             lastBeta = beta;
             lastAlpha = alpha;
+            setGammaDiff(dGamma);
         }
         window.addEventListener('deviceorientation', deviceOrientationHandler);
 
@@ -155,8 +157,10 @@ function GameEngine() {
     return (<>
         {/* layout */}
         <div className="fixed top-0 left-0 w-full h-full bg-transparent flex flex-row justify-start items-start text-white">
-            <div>Gamma : {gamma+90}</div>
-            <div className="absolute bottom-3 right-3 bg-[#ffffff22] w-12 h-12 rounded-full"></div>
+            <div>Gamma : {gammaDiff}</div>
+            <div className="absolute bottom-3 right-3 bg-[#ffffff22] w-12 h-12 rounded-full"
+            onClick={e => navigator.vibrate(1000)}
+            ></div>
         </div>
         <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
     </>);

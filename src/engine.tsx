@@ -65,7 +65,10 @@ function GameEngine() {
 
             scene.registerBeforeRender(() => {
                 // 카메라 위치 설정
+                let last = camera.target.clone();
                 camera.target = player.position;
+                let diff = camera.target.subtract(last);
+                camera.position = camera.position.add(diff);
             });
 
             scene.onBeforeRenderObservable.add(() => {
@@ -77,7 +80,7 @@ function GameEngine() {
         }
 
         // 디바이스 방향 센서 이벤트 리스너
-        window.addEventListener('deviceorientation', (event) => {
+        const deviceOrientationHandler = (event: DeviceOrientationEvent) => {
             let { beta, gamma, alpha } = event;
             beta = beta ? beta : 0;
             gamma = gamma ? gamma : 0;
@@ -85,19 +88,20 @@ function GameEngine() {
             setBeta(beta);
             setGamma(gamma);
             setAlpha(alpha);
-            dGamma = calculateCircularDifference(lastGamma, gamma, 180);
-            dBeta = calculateCircularDifference(lastBeta, beta, 180);
+            dGamma = calculateCircularDifference(lastGamma, gamma, 360);
+            dBeta = calculateCircularDifference(lastBeta, beta, 360);
             dAlpha = calculateCircularDifference(lastAlpha, alpha, 360);
             lastGamma = gamma;
             lastBeta = beta;
             lastAlpha = alpha;
-        });
+        }
+        window.addEventListener('deviceorientation', deviceOrientationHandler);
 
         // 가속도 센서에 따른 카메라 회전
         const updateCamera = () => {
             const camera = engine.scenes[0].activeCamera as BABYLON.ArcRotateCamera;
             camera.alpha += dAlpha / 100;
-            camera.beta += dGamma / 100;
+            camera.beta -= dGamma / 100;
         }
 
         // 캔버스 크기 조정 함수
@@ -111,6 +115,15 @@ function GameEngine() {
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
+
+        // 화면 터치 이벤트 리스너
+        const touchHandler = (event: TouchEvent) => {
+            [...event.touches].forEach((touch, index) => {
+            });
+        }
+        window.addEventListener('touchstart', touchHandler);
+        window.addEventListener('touchmove', touchHandler);
+        window.addEventListener('touchend', touchHandler);
     
         // 씬 생성 및 렌더 루프 설정
         const scene = createScene();
@@ -121,16 +134,18 @@ function GameEngine() {
 
         return () => {
             window.removeEventListener('resize', resizeCanvas);
+            window.removeEventListener('deviceorientation', deviceOrientationHandler);
+            window.removeEventListener('touchstart', touchHandler);
+            window.removeEventListener('touchmove', touchHandler);
+            window.removeEventListener('touchend', touchHandler);
             engine.stopRenderLoop();
         }
     }, [once]);
 
     return (<>
         {/* layout */}
-        <div className="fixed top-0 left-0 w-full h-full bg-transparent flex flex-col justify-start items-start text-white">
-            <div>Alpha : {alpha}</div>
-            <div>Beta : {beta}</div>
-            <div>Gamma : {gamma}</div>
+        <div className="fixed top-0 left-0 w-full h-full bg-transparent flex flex-row justify-start items-start text-white">
+            <div className="absolute bottom-3 right-3 bg-[#ffffff22] w-12 h-12 rounded-full"></div>
         </div>
         <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
     </>);

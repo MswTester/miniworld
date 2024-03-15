@@ -8,15 +8,17 @@ function GameEngine() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [beta, setBeta] = useState<number>(0);
     const [gamma, setGamma] = useState<number>(0);
-    const [acceleration, setAcceleration] = useState<{ x: number|null, y: number|null, z: number|null }>({ x: 0, y: 0, z: 0 });
+    const [alpha, setAlpha] = useState<number>(0);
 
     useEffect(() => setOnce(true), [])
     useEffect(() => {
         if(!once) return;
         let lastGamma = 0;
         let lastBeta = 0;
+        let lastAlpha = 0;
         let dGamma = 0;
         let dBeta = 0;
+        let dAlpha = 0;
 
         // 캔버스와 엔진 초기화
         const canvas = canvasRef.current as HTMLCanvasElement;
@@ -63,15 +65,19 @@ function GameEngine() {
 
         // 디바이스 방향 센서 이벤트 리스너
         window.addEventListener('deviceorientation', (event) => {
-            let { beta, gamma } = event;
+            let { beta, gamma, alpha } = event;
             beta = beta ? beta : 0;
             gamma = gamma ? gamma : 0;
+            alpha = alpha ? alpha : 0;
             setBeta(beta);
             setGamma(gamma);
+            setAlpha(alpha);
             dGamma = gamma - lastGamma;
             dBeta = beta - lastBeta;
+            dAlpha = alpha - lastAlpha;
             lastGamma = gamma;
             lastBeta = beta;
+            lastAlpha = alpha;
         });
 
         // 가속도 센서에 따른 카메라 회전
@@ -80,7 +86,7 @@ function GameEngine() {
             camera.alpha += dGamma / 100;
             camera.beta += dBeta / 100;
         }
-        
+
         // 캔버스 크기 조정 함수
         const resizeCanvas = () => {
             const canvas = canvasRef.current;
@@ -109,11 +115,9 @@ function GameEngine() {
     return (<>
         {/* layout */}
         <div className="fixed top-0 left-0 w-full h-full bg-transparent flex flex-col justify-start items-start text-white">
-            <div>Gamma : {gamma}</div>
+            <div>Alpha : {alpha}</div>
             <div>Beta : {beta}</div>
-            <div>X : {acceleration.x}</div>
-            <div>Y : {acceleration.y}</div>
-            <div>Z : {acceleration.z}</div>
+            <div>Gamma : {gamma}</div>
         </div>
         <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
     </>);

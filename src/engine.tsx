@@ -8,6 +8,7 @@ function GameEngine() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [beta, setBeta] = useState<number>(0);
     const [gamma, setGamma] = useState<number>(0);
+    const [acceleration, setAcceleration] = useState<{ x: number|null, y: number|null, z: number|null }>({ x: 0, y: 0, z: 0 });
 
     useEffect(() => setOnce(true), [])
     useEffect(() => {
@@ -33,7 +34,7 @@ function GameEngine() {
             
             // 카메라 생성
             const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 4, 10, BABYLON.Vector3.Zero(), scene);
-            camera.attachControl(canvas, true);
+            camera.attachControl(canvas, false);
             
             // 라이트 생성
             const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene);
@@ -56,11 +57,19 @@ function GameEngine() {
             window.addEventListener('deviceorientation', (e) => {
                 const { beta, gamma } = e;
                 if (!beta || !gamma) return;
-                player.position.x += gamma / 100;
-                player.position.z += beta / 100;
+                // player.position.x += gamma / 1000;
+                // player.position.z += beta / 1000;
                 setBeta(beta);
                 setGamma(gamma);
             });
+
+            window.addEventListener('devicemotion', (e) => {
+                const { acceleration } = e;
+                if (!acceleration) return;
+                player.position.x += (acceleration.x || 0) / 1000;
+                player.position.z += (acceleration.y || 0) / 1000;
+                setAcceleration({...acceleration});
+            })
             
             return scene;
         }
@@ -84,16 +93,12 @@ function GameEngine() {
 
     return (<>
         {/* layout */}
-        <div className="fixed top-0 left-0 w-full h-full bg-[#000000aa] z-10">
-            {/* display accelermeter */}
-            <div className="fixed top-0 left-0 w-full h-20 bg- z-10">
-                <div className="flex flex-row items-center justify-center w-full h-full">
-                    <div className="flex-1 w-full h-full flex flex-col items-center justify-center">
-                        <div className="text-white text-2xl">beta: {beta.toFixed(2)}</div>
-                        <div className="text-white text-2xl">gamma: {gamma.toFixed(2)}</div>
-                    </div>
-                </div>
-            </div>
+        <div className="fixed top-0 left-0 w-full h-full bg-transparent flex flex-col justify-start items-start text-white">
+            <div>Gamma : {gamma}</div>
+            <div>Beta : {beta}</div>
+            <div>X : {acceleration.x}</div>
+            <div>Y : {acceleration.y}</div>
+            <div>Z : {acceleration.z}</div>
         </div>
         <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
     </>);

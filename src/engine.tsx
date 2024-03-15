@@ -13,16 +13,10 @@ function GameEngine() {
     useEffect(() => setOnce(true), [])
     useEffect(() => {
         if(!once) return;
-        const resizeCanvas = () => {
-            const canvas = canvasRef.current;
-            if (canvas) {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-        }
-      
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        let lastGamma = 0;
+        let lastBeta = 0;
+        let dGamma = 0;
+        let dBeta = 0;
 
         // 캔버스와 엔진 초기화
         const canvas = canvasRef.current as HTMLCanvasElement;
@@ -47,42 +41,62 @@ function GameEngine() {
             // 지면 생성
             const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 6, height: 6 }, scene);
             ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.PlaneImpostor, { mass: 0, restitution: 0.9 }, scene);
-    
-            // 플레이어 생성
-            const player = BABYLON.MeshBuilder.CreateBox("player", { size: 1 }, scene);
-            player.position.y = 5;
-            player.physicsImpostor = new BABYLON.PhysicsImpostor(player, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, restitution: 0.9 }, scene);
 
-            // 플레이어 이동
-            window.addEventListener('deviceorientation', (e) => {
-                const { beta, gamma } = e;
-                if (!beta || !gamma) return;
-                // player.position.x += gamma / 1000;
-                // player.position.z += beta / 1000;
-                setBeta(beta);
-                setGamma(gamma);
+            // 캐릭터 생성
+            const player = BABYLON.MeshBuilder.CreateCylinder("player", { height: 2, diameterTop: 1, diameterBottom: 1 }, scene);
+            player.position.y = 0.5;
+            player.physicsImpostor = new BABYLON.PhysicsImpostor(player, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 1, restitution: 0.9 }, scene);
+
+            scene.registerBeforeRender(() => {
+                // 카메라 위치 설정
+                camera.target = player.position;
             });
 
-            window.addEventListener('devicemotion', (e) => {
-                const { acceleration } = e;
-                if (!acceleration) return;
-                player.position.x += (acceleration.x || 0) / 1000;
-                player.position.z += (acceleration.y || 0) / 1000;
-                setAcceleration({...acceleration});
-            })
-            
+            scene.onBeforeRenderObservable.add(() => {
+                // 원통의 회전을 0으로 고정
+                player.rotationQuaternion = BABYLON.Quaternion.Identity();
+            });
+
             return scene;
         }
+
+        // 디바이스 방향 센서 이벤트 리스너
+        window.addEventListener('deviceorientation', (event) => {
+            let { beta, gamma } = event;
+            beta = beta ? beta : 0;
+            gamma = gamma ? gamma : 0;
+            setBeta(beta);
+            setGamma(gamma);
+            dGamma = gamma - lastGamma;
+            dBeta = beta - lastBeta;
+            lastGamma = gamma;
+            lastBeta = beta;
+        });
+
+        // 가속도 센서에 따른 카메라 회전
+        const updateCamera = () => {
+            const camera = engine.scenes[0].activeCamera as BABYLON.ArcRotateCamera;
+            camera.alpha += dGamma / 100;
+            camera.beta += dBeta / 100;
+        }
+        
+        // 캔버스 크기 조정 함수
+        const resizeCanvas = () => {
+            const canvas = canvasRef.current;
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            engine.resize();
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
     
         // 씬 생성 및 렌더 루프 설정
         const scene = createScene();
         engine.runRenderLoop(() => {
             scene.render();
-        });
-    
-        // 브라우저 창 크기 조정 시 씬 크기 조정
-        window.addEventListener('resize', () => {
-            engine.resize();
+            updateCamera();
         });
 
         return () => {

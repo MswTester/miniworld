@@ -84,13 +84,13 @@ function GameEngine() {
 
     return (<>
         {/* layout */}
-        <div className="fixed top-0 left-0 w-full h-full bg-black z-10">
+        <div className="fixed top-0 left-0 w-full h-full bg-[#000000aa] z-10">
             {/* display accelermeter */}
-            <div className="fixed top-0 left-0 w-full h-20 bg-black z-10">
+            <div className="fixed top-0 left-0 w-full h-20 bg- z-10">
                 <div className="flex flex-row items-center justify-center w-full h-full">
-                    <div className="flex-1 w-full h-full flex flex-row items-center justify-center">
-                        <div className="text-white text-2xl">beta: {beta}</div>
-                        <div className="text-white text-2xl">gamma: {gamma}</div>
+                    <div className="flex-1 w-full h-full flex flex-col items-center justify-center">
+                        <div className="text-white text-2xl">beta: {beta.toFixed(2)}</div>
+                        <div className="text-white text-2xl">gamma: {gamma.toFixed(2)}</div>
                     </div>
                 </div>
             </div>
